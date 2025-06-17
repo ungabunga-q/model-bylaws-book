@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Bylaws - Complete UI Redesign</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@0.378.0/dist/umd/lucide.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #f8fafc; /* slate-50 */
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9; /* slate-100 */
+            --text-primary: #1e293b; /* slate-800 */
+            --text-secondary: #475569; /* slate-600 */
+            --text-accent: #4f46e5; /* indigo-600 */
+            --border-primary: #e2e8f0; /* slate-200 */
+            --border-secondary: #cbd5e1; /* slate-300 */
+            --accent-primary: #6366f1; /* indigo-500 */
+            --accent-hover: #4f46e5; /* indigo-600 */
+        }
+
+        .dark {
+            --bg-primary: #0f172a; /* slate-900 */
+            --bg-secondary: #1e293b; /* slate-800 */
+            --bg-tertiary: #334155; /* slate-700 */
+            --text-primary: #e2e8f0; /* slate-200 */
+            --text-secondary: #94a3b8; /* slate-400 */
+            --text-accent: #818cf8; /* indigo-400 */
+            --border-primary: #334155; /* slate-700 */
+            --border-secondary: #475569; /* slate-600 */
+            --accent-primary: #818cf8; /* indigo-400 */
+            --accent-hover: #6366f1; /* indigo-500 */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; border: 2px solid var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Highlight style */
+        mark.highlight { background-color: #fcd34d; color: #1e293b; padding: 2px 1px; border-radius: 3px; }
+        mark.highlight.active { background-color: #fca5a5; box-shadow: 0 0 0 2px #fca5a5; }
+
+        /* General UI */
+        h1, h2, h3, h4, h5, h6 { color: var(--text-primary); }
+        .prose h3 { border-bottom-color: var(--border-secondary); }
+        
+        .bylaw-item { 
+            background-color: var(--bg-secondary); 
+            border: 1px solid var(--border-primary); 
+            border-top: 4px solid var(--accent-primary);
+        }
+        .bylaw-item:hover { border-color: var(--accent-primary); border-top-color: var(--accent-primary); }
+        .bylaw-title { color: var(--text-accent); }
+        .bylaw-content b { color: var(--text-primary); }
+
+        .definition-box { background-color: var(--bg-tertiary); border-left-color: var(--accent-primary); }
+        .definition-box p { color: var(--text-secondary); }
+        .definition-box b { color: var(--text-accent); }
+
+        .nav-link.active { background-color: var(--bg-tertiary); color: var(--text-accent); }
+        .nav-link.active i { color: var(--text-accent); }
+        
+        .bookmark-btn.bookmarked i {
+            fill: #f59e0b; /* amber-500 */
+            color: #f59e0b;
+        }
+
+        @media print {
+            body { background-color: #fff; color: #000;}
+            body * { visibility: hidden; }
+            #content-area, #content-area * { visibility: visible; }
+            #content-area { position: absolute; left: 0; top: 0; width: 100%; }
+            .bylaw-item { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+            .bookmark-btn, .prose h3 { page-break-after: avoid; }
+            h3, h4, p, li { color: #000 !important; }
+            .bylaw-title, .definition-box b { color: #00008b !important; }
+            .definition-box { background-color: #f0f0f0 !important; border-left-color: #00008b !important;}
+        }
+
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="w-1/4 max-w-[280px] bg-[var(--bg-secondary)] p-6 overflow-y-auto border-r border-[var(--border-primary)] hidden lg:flex flex-col">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="bg-indigo-500 p-2 rounded-lg">
+                    <i data-lucide="scale" class="text-white"></i>
+                </div>
+                <h2 class="text-xl font-bold">Model Bylaws</h2>
+            </div>
+            <nav id="sidebar-nav" class="flex-grow">
+                <!-- Navigation links will be injected here by JavaScript -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col bg-[var(--bg-primary)]">
+            <!-- Header -->
+            <header class="bg-[var(--bg-secondary)]/80 backdrop-blur-lg sticky top-0 z-20 border-b border-[var(--border-primary)]">
+                <div class="container mx-auto px-6 py-3 flex items-center justify-between gap-4">
+                     <h1 class="text-2xl font-bold lg:hidden">modelbylaws</h1>
+                    <div class="w-full max-w-2xl flex items-center">
+                        <div class="relative w-full">
+                            <input type="search" id="search-input" placeholder="Search bylaws (e.g., 'expulsion')" class="w-full pl-10 pr-4 py-2 border border-[var(--border-secondary)] bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
+                        </div>
+                        <button id="search-button" class="bg-[var(--accent-primary)] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[var(--accent-hover)] transition ml-2 whitespace-nowrap">Search</button>
+                    </div>
+                     <div class="flex items-center gap-2">
+                        <button id="bookmark-show-btn" class="p-2 rounded-lg border border-[var(--border-secondary)] hover:bg-[var(--bg-tertiary)]">
+                            <i data-lucide="bookmark" class="w-5 h-5 text-[var(--text-secondary)]"></i>
+                        </button>
+                        <button id="print-btn" class="p-2 rounded-lg border border-[var(--border-secondary)] hover:bg-[var(--bg-tertiary)]">
+                            <i data-lucide="printer" class="w-5 h-5 text-[var(--text-secondary)]"></i>
+                        </button>
+                        <button id="dark-mode-toggle" class="p-2 rounded-lg border border-[var(--border-secondary)] hover:bg-[var(--bg-tertiary)]">
+                            <i data-lucide="moon" class="w-5 h-5 text-[var(--text-secondary)] hidden [.light_&]:block"></i>
+                            <i data-lucide="sun" class="w-5 h-5 text-[var(--text-secondary)] hidden [.dark_&]:block"></i>
+                        </button>
+                         <button id="mobile-menu-button" class="lg:hidden p-2 rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]">
+                            <i data-lucide="menu" class="h-6 w-6"></i>
+                        </button>
+                    </div>
+                </div>
+                 <div id="search-results-info" class="text-center text-sm text-[var(--text-secondary)] py-2 border-t border-[var(--border-primary)] hidden items-center justify-center gap-4"></div>
+            </header>
+
+            <!-- Content Area -->
+            <div id="content-area" class="flex-1 p-6 md:p-8 lg:p-12 overflow-y-auto">
+                <div id="bylaws-content" class="prose max-w-4xl mx-auto">
+                    <!-- Bylaws text will be loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Bookmarks Modal -->
+    <div id="bookmarks-modal" class="fixed inset-0 bg-black/60 z-30 hidden items-center justify-center p-4">
+        <div class="bg-[var(--bg-secondary)] rounded-lg shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b border-[var(--border-primary)]">
+                <h3 class="text-lg font-semibold">Bookmarked Bylaws</h3>
+                <button id="bookmarks-close-btn" class="p-2 rounded-full hover:bg-[var(--bg-tertiary)]">
+                    <i data-lucide="x" class="w-5 h-5 text-[var(--text-secondary)]"></i>
+                </button>
+            </div>
+            <div id="bookmarks-list" class="p-6 overflow-y-auto">
+                <!-- Bookmarks will be listed here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Sidebar -->
+    <div id="mobile-menu" class="fixed inset-0 bg-black bg-opacity-60 z-40 hidden">
+        <aside id="mobile-sidebar" class="w-3/4 max-w-sm bg-[var(--bg-secondary)] h-full p-6 overflow-y-auto shadow-xl transition-transform duration-300 ease-in-out -translate-x-full border-r border-[var(--border-primary)]">
+             <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-500 p-2 rounded-lg">
+                         <i data-lucide="scale" class="text-white"></i>
+                    </div>
+                    <h2 class="text-xl font-bold">Model Bylaws</h2>
+                </div>
+                <button id="close-mobile-menu" class="p-2 rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]">
+                     <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <nav id="mobile-sidebar-nav">
+                <!-- Mobile navigation links will be injected here -->
+            </nav>
+        </aside>
+    </div>
+
+
+    <script>
+        // --- DATA ---
+        // This variable now contains the full, corrected text of the bylaws.
+        const bylawsText = `
+<h3 id="section-1">I. PRELIMINARY</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-1" data-bylaw-title="1. Name and Classification">
+    <h4 class="bylaw-title">1. Name and Classification</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>(a) Name of the Society:</b> The name of the society shall be [Society Name].</p>
+        <p><b>(b) Changing the name:</b> The society shall follow the procedure laid down under Section 15 of the Act and Rule 14 of the Rules for the change of its name.</p>
+        <p><b>(c) Classification:</b> The society is classified under major class "Housing" with sub-class "Tenant Ownership/Tenant Co-partnership Housing Society."</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-2" data-bylaw-title="2. Address and Name Board">
+    <h4 class="bylaw-title">2. Address and Name Board</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>(a) Address of the society:</b> The registered address of the society shall be as under: [Society Address].</p>
+        <p><b>(b) Intimation of change in address:</b> Any change in the registered address shall be intimated to the Registering Authority and all others concerned within 30 days.</p>
+        <p><b>(c) Procedure for changing address:</b> Any change in the registered address shall be made after following the procedure laid down in Rule 31 of the Rules.</p>
+        <p><b>(d) Exhibition of Name Board:</b> The society shall exhibit a Board at the main entrance indicating its name, registration number, and registered address.</p>
+    </div>
+</div>
+
+<h3 id="section-2">II. INTERPRETATIONS</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-3" data-bylaw-title="3. Interpretations of words and terms">
+    <h4 class="bylaw-title">3. Interpretations of words and terms</h4>
+    <div class="bylaw-content space-y-3">
+        <div class="definition-box"><p><b>(i) 'Act':</b> means the Maharashtra Co-operative Societies Act (MCS Act), 1960.</p></div>
+        <div class="definition-box"><p><b>(ii) 'Bye-laws':</b> means the registered bye-laws of the society.</p></div>
+        <div class="definition-box"><p><b>(iii) 'Chief Promoter':</b> means the person elected by the Promoters in their first meeting, to lead until the first general meeting.</p></div>
+        <div class="definition-box"><p><b>(iv) 'Committee':</b> means the committee of members entrusted with the management of the Society's affairs.</p></div>
+        <div class="definition-box"><p><b>(v) Days' Clear Notice:</b> means the number of calender days intervening between the day of posting the notice and the day of the meeting.</p></div>
+        <div class="definition-box"><p><b>(vi) 'Flat':</b> means a separate and self contained set of premises for residence or commercial use, including a garage, and includes an apartment.</p></div>
+        <div class="definition-box"><p><b>(vii) 'Housing Federation':</b> means the federation of co-operative housing societies, registered under the Act.</p></div>
+        <div class="definition-box"><p><b>(viii) 'Ownership Flats Act':</b> means the Maharashtra Ownership Flats (Regulation of the Promotion of Construction, Sale, Management and Transfer) Act. 1963.</p></div>
+        <div class="definition-box"><p><b>(xii) 'Promoter':</b> means a person, who has signed the application for registration of the society.</p></div>
+        <div class="definition-box"><p><b>(xiii) 'Builder-Promoter':</b> means a person who constructs or causes to be constructed a block or building of flats or apartments for the purpose of selling some or all of them to other persons, or to a company, co-operative society or other association of persons, and includes his assignees; and where the person who builds and the person who sells are different persons, the term includes both.</p></div>
+        <div class="definition-box"><p><b>(xxiv) 'Member':</b> means a person joining in an application for Registration, or a person duly admitted to membership after Registration. It includes a Nominal and Associate member.</p></div>
+        <div class="definition-box"><p><b>(a) 'Associate Member':</b> means a member who holds jointly a share of a society with others, but whose name does not stand first in the share certificate.</p></div>
+        <div class="definition-box"><p><b>(b) 'Nominal Member':</b> means a person admitted to membership as such after registration in accordance with the Bye laws.</p></div>
+        <div class="definition-box"><p><b>(xxv) 'Family':</b> means a group of persons which includes husband, wife, father, mother, sister, brother, son, daughter, son-in-law, brother-in-law, sister-in-law, daughter-in-law, grandson/daughter.</p></div>
+    </div>
+</div>
+
+<h3 id="section-3">III. AREA OF OPERATION</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-4" data-bylaw-title="4. Area of operation">
+    <h4 class="bylaw-title">4. Area of operation of the society</h4>
+    <div class="bylaw-content">
+       <p>The area of operation of the society shall be confined to [Area of Operation].</p>
+    </div>
+</div>
+
+<h3 id="section-4">IV. OBJECTS</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-5" data-bylaw-title="5. Objects of the society">
+    <h4 class="bylaw-title">5. Objects of the society</h4>
+    <div class="bylaw-content">
+        <ul class="list-disc list-inside space-y-2">
+            <li>To obtain conveyance from the owner/Promoter (Builder) of the right, title and interest, in the land with building/buildings thereon.</li>
+            <li>To manage, maintain and administer the property of the society.</li>
+            <li>To raise funds for achieving the objects of the society.</li>
+            <li>To undertake and provide for social, cultural or recreative activities.</li>
+            <li>To do all things necessary or expedient for the attainment of the society's objects.</li>
+        </ul>
+    </div>
+</div>
+
+<h3 id="section-5">V. AFFILIATION</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-6" data-bylaw-title="6. Affiliation">
+    <h4 class="bylaw-title">6. Affiliation to other co-op. institutions</h4>
+     <div class="bylaw-content">
+        <p>The society, immediately after its registration, shall become a member of the Housing Federation of the District/Area, the District Central Co-operative Bank of the District, and shall pay sums, from time to time, payable by it, under the bye-laws of the respective organisations.</p>
+     </div>
+</div>
+
+<h3 id="section-6">VI. FUNDS, THEIR UTILISATION AND INVESTMENT</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-7" data-bylaw-title="7. Modes of raising funds">
+    <h4 class="bylaw-title">7. Modes of raising funds</h4>
+    <div class="bylaw-content">
+        <p>The funds of the society may be raised in one or more of the following ways: (a) by entrance fees, (b) by issue of shares, (c) by loans and subsidies, (d) by deposits, (e) by voluntary donations, (f) by contributions towards cost of building, (g) by fee on transfer of shares, (h) by premium on transfer of occupancy right, (i) by any other mode permitted under these bye-laws, (j) by way of statutory requirements.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-8-10" data-bylaw-title="8-10. Share Capital">
+    <h4 class="bylaw-title">8-10. Share Capital</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>8. Authorised share capital:</b> The authorised share capital shall be Rs. [Amount] divided into [Number] shares of Rs. 50 each.</p>
+        <p><b>9. Issue of share certificates:</b> A share certificate shall be issued to every member for the shares subscribed by him, within a period of six months of the allotment.</p>
+        <p><b>10. Seal and signatures:</b> Every share certificate shall bear the seal of the society and be signed by the Chairman, the Secretary and one member of the committee.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-11" data-bylaw-title="11. Limit of Liabilities">
+    <h4 class="bylaw-title">11. Limit of Liabilities</h4>
+    <div class="bylaw-content">
+        <p>Deposits and loans may be received by the society up to such amount and on such terms as determined by the Committee, provided the total liabilities do not exceed the limit prescribed under Rule 35 of the Rules.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-12" data-bylaw-title="12. Reserve Fund">
+    <h4 class="bylaw-title">12. Reserve Fund</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>(i) Constitution:</b> The Reserve Fund shall comprise of amounts from net profit, all entrance fees, all transfer fees, all premiums on transfers, and all donations (not for a specific purpose).</p>
+        <p><b>(ii) Appropriation:</b> The society shall appropriate all amounts from (b) to (e) of the previous clause to the Reserve Fund while finalising the accounts.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-13" data-bylaw-title="13. Other Funds">
+    <h4 class="bylaw-title">13. Other Funds</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>(a) Repairs and Maintenance Fund:</b> At a rate fixed by the general body, minimum of 0.75% per annum of the construction cost of each flat.</p>
+        <p><b>(b) Major Repairs Fund:</b> As required and decided by the General Body, at a rate fixed on area basis.</p>
+        <p><b>(c) Sinking Fund:</b> At a rate decided by the general body, minimum of 0.25% per annum of the construction cost of each flat.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-14" data-bylaw-title="14. Utilisation of Funds">
+    <h4 class="bylaw-title">14. Utilisation of Funds</h4>
+    <div class="bylaw-content space-y-2">
+       <p><b>(a) Reserve Fund:</b> For expenditure on repairs, maintenance and renewals of the society's property.</p>
+       <p><b>(b) Repairs and Maintenance Fund:</b> For meeting the expenditure on maintenance of the society's property and repairs and renewals thereof.</p>
+       <p><b>(c) Sinking Fund:</b> With prior permission of the Registering Authority, for reconstruction of buildings or for carrying out structural additions or alterations.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-15" data-bylaw-title="15. Investment of Funds">
+    <h4 class="bylaw-title">15. Investment of Funds</h4>
+    <div class="bylaw-content">
+        <p>Funds not employed in its business may be invested or deposited as required under Section 70 of the Act. Sinking fund collections shall be invested on a long term basis.</p>
+    </div>
+</div>
+
+<h3 id="section-7">VII. MEMBERS, THEIR RIGHTS, RESPONSIBILITIES AND LIABILITIES</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-16-18" data-bylaw-title="16-18. Membership">
+    <h4 class="bylaw-title">16-18. Membership</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>16. Classes of Members:</b> Membership shall consist of (i) members (including associate members) and (ii) nominal members.</p>
+        <p><b>17. Eligibility for Membership:</b> An individual competent to contract, a firm, company, registered society, government body, local authority, or public trust can be a member. A minor can be a member through a guardian. Admission may be subject to the Collector's approval if the land was government-allotted.</p>
+        <p><b>18. Corporate Body Membership:</b> Firms, companies, and other corporate bodies can be admitted subject to government notifications and conditions, such as providing housing to their employees.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-19-21" data-bylaw-title="19-21. Conditions and Procedure for Membership">
+    <h4 class="bylaw-title">19-21. Conditions and Procedure for Membership</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>19. Conditions for Individuals:</b> Requires application, payment for five shares (Rs. 250), entrance fee (Rs. 100), disclosures of other properties, and undertakings to use the flat for the stated purpose and abide by bye-laws.</p>
+        <p><b>20. Conditions for Nominal Members:</b> A sub-lettee, licensee, or caretaker can be admitted as a nominal member on application through the original member and payment of a Rs. 100 entrance fee.</p>
+        <p><b>21. Disposal of Applications:</b> The Secretary and Committee shall follow the procedure under bye-law No. 65 for all membership applications.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-22-26" data-bylaw-title="22-26. Rights of Members">
+    <h4 class="bylaw-title">22-26. Rights of Members</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>22. Get Copy of Bye-laws:</b> A member is entitled to a copy of the bye-laws on payment.</p>
+        <p><b>23. Inspect Books and Records:</b> A member can inspect society documents free of cost and get copies on payment.</p>
+        <p><b>24. Occupation of Flats:</b> A member has the right to occupy the allotted flat subject to terms and conditions. Associate/nominal members can occupy with the member's consent and society's permission.</p>
+        <p><b>25-26. Restrictions on Associate/Nominal Members:</b> An associate member has limited rights (voting in absence of the primary member). A nominal member has no rights of a member.</p>
+    </div>
+</div>
+
+<div class="bylaw-item" data-bylaw-id="bylaw-27-31" data-bylaw-title="27-31. Resignation of Membership">
+    <h4 class="bylaw-title">27-31. Resignation of Membership</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>27. Member's Resignation:</b> A member may resign with three months' notice. Resignation is only accepted after all dues are paid. The society must communicate acceptance or rejection within 3 months.</p>
+        <p><b>28. Associate Member's Resignation:</b> An associate member can resign anytime through the primary member. The committee's decision is communicated within 15 days.</p>
+        <p><b>29. Corporate Nominal Member's Resignation:</b> A nominal member representing a firm/company can resign through that body. The process is similar to an associate member's resignation.</p>
+        <p><b>30. Sub-lettee Nominal Member's Resignation:</b> A sub-lettee/licensee can resign through the original member who granted them possession.</p>
+        <p><b>31. Acquisition of Shares:</b> Upon a member's resignation, the society acquires their shares and interest in the property, paying them the value thereof.</p>
+    </div>
+</div>
+
+<div class="bylaw-item" data-bylaw-id="bylaw-32-37" data-bylaw-title="32-37. Nominations">
+    <h4 class="bylaw-title">32-37. Nominations</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>32. Making a Nomination:</b> A member can nominate one or more persons to receive their shares and interest upon death. The first nomination is free; subsequent changes incur a fee.</p>
+        <p><b>33. Recording Nominations:</b> Nominations are recorded in the committee meeting minutes and entered into the nomination register.</p>
+        <p><b>34. Transfer to Nominee:</b> Upon a member's death, the society transfers the shares and interest to the nominee(s) after they apply for membership.</p>
+        <p><b>35. Transfer without Nomination:</b> If no nomination exists, the society invites claims via public notice and decides on the legal heir, who must provide an Indemnity Bond.</p>
+        <p><b>36-37. Payment to Nominee/Heir:</b> If a nominee or heir demands payment instead of membership, the society acquires the shares and interest and pays the value thereof.</p>
+    </div>
+</div>
+
+<div class="bylaw-item" data-bylaw-id="bylaw-38-40" data-bylaw-title="38-40. Transfer of Shares and Interest">
+    <h4 class="bylaw-title">38-40. Transfer of Shares and Interest</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>38. Notice of Transfer:</b> A member must give 15 days' notice to transfer their shares and interest, providing the proposed transferee's consent. No Objection Certificate is not required but can be requested. A premium can be charged as fixed by the general body.</p>
+        <p><b>39. Disposal of Applications:</b> The committee cannot ordinarily refuse a transfer application except for non-compliance with laws/bye-laws. Deemed acceptance if not communicated within 3 months.</p>
+        <p><b>40. Transferee's Rights:</b> The transferee can exercise membership rights upon receiving an official letter from the society.</p>
+    </div>
+</div>
+
+<div class="bylaw-item" data-bylaw-id="bylaw-41-42" data-bylaw-title="41-42. Exchange of Flats">
+    <h4 class="bylaw-title">41-42. Exchange of Flats</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>41. Application for Exchange:</b> Members wishing to exchange flats must submit a joint application with all relevant details.</p>
+        <p><b>42. Disposal of Application:</b> The application is processed as per the procedure in bye-law 65.</p>
+    </div>
+</div>
+
+<div class="bylaw-item" data-bylaw-id="bylaw-43-45" data-bylaw-title="43-45. Sub-letting of Flats">
+    <h4 class="bylaw-title">43-45. Sub-letting of Flats</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>43. Permission for Sub-letting:</b> A member can sub-let their flat only with prior written permission from the committee, for reasons like long absence due to service, business, illness, or children's education. Non-occupancy charges apply unless occupied by "Family".</p>
+        <p><b>44. Disposal of Application:</b> The application for sub-letting is processed as per bye-law 65.</p>
+        <p><b>45. Restriction on Assignment:</b> A member cannot assign, mortgage, or create any charge on their occupancy right without the committee's permission, except for obtaining a loan from approved financial institutions.</p>
+    </div>
+</div>
+
+<div class="bylaw-item" data-bylaw-id="bylaw-46-50" data-bylaw-title="46-50. Maintenance of Flats by Members">
+    <h4 class="bylaw-title">46-50. Maintenance of Flats by Members</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>46. Cleanliness:</b> Every member must keep their flat clean.</p>
+        <p><b>47. Additions and Alterations:</b> No additions or alterations can be made without prior written permission from the committee.</p>
+        <p><b>48. Inspection and Repairs:</b> Members must allow inspection of their flats for repair assessment. The society will carry out common repairs at its cost, while members are responsible for internal repairs at their own cost.</p>
+        <p><b>49. Storage Restrictions:</b> Storing combustible or hazardous materials requires prior permission.</p>
+        <p><b>50. Nuisance:</b> Members shall not cause nuisance, annoyance, or inconvenience to other members.</p>
+    </div>
+</div>
+
+<div class="bylaw-item" data-bylaw-id="bylaw-51-56" data-bylaw-title="51-56. Expulsion of a Member">
+    <h4 class="bylaw-title">51-56. Expulsion of a Member</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>51. Grounds for Expulsion:</b> Grounds include persistent failure to pay dues, deceiving the society, using the flat for illegal/immoral purposes, or serious breaches of bye-laws.</p>
+        <p><b>52. Procedure:</b> Expulsion is handled as per Section 35 of the Act and may involve forfeiture of shares.</p>
+        <p><b>53-56. Effect of Expulsion:</b> An expelled member ceases to be a member, must vacate the flat, and is not eligible for re-admission for one year.</p>
+    </div>
+</div>
+
+<div class="bylaw-item" data-bylaw-id="bylaw-57-61" data-bylaw-title="57-61. Cessation of Membership">
+    <h4 class="bylaw-title">57-61. Cessation of Membership</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>57. How Membership Ceases:</b> Membership ceases upon resignation, transfer of all shares, death, expulsion, insolvency, or if whereabouts are unknown for 7 years.</p>
+        <p><b>58-60. Cessation for Associate/Nominal Members:</b> Their membership ceases when the original member's membership ceases, or upon their own death or resignation.</p>
+        <p><b>61. Action by Committee:</b> The committee must record the fact of cessation of membership in its minutes and inform the concerned person.</p>
+    </div>
+</div>
+
+<div class="bylaw-item" data-bylaw-id="bylaw-62-66" data-bylaw-title="62-66. Liabilities and Other Matters">
+    <h4 class="bylaw-title">62-66. Liabilities and Other Matters</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>62. Holding More Than One Flat:</b> A member may hold more than one flat subject to conditions under Section 6 of the Act.</p>
+        <p><b>63-64. Liability:</b> A member's liability is limited to their shareholding. A past member's liability continues for 2 years after cessation.</p>
+        <p><b>65. Disposal of Applications:</b> All applications must be addressed to the Secretary and disposed of by the committee within 3 months.</p>
+        <p><b>66. Payment of Value of Shares:</b> Details the procedure for valuing and paying for shares and interest when acquired by the society.</p>
+    </div>
+</div>
+
+<h3 id="section-8">VIII. LEVY OF CHARGES OF THE SOCIETY</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-67-72" data-bylaw-title="67-72. Levy of Charges">
+    <h4 class="bylaw-title">67-72. Levy of Charges</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>67. Composition of Charges:</b> Includes property taxes, water charges, common electricity, maintenance funds, lift expenses, service charges, parking charges, loan repayments, insurance, etc.</p>
+        <p><b>68. Service Charges:</b> Includes salaries of staff, office expenses, audit fees, legal charges, etc.</p>
+        <p><b>69. Apportionment of Charges:</b> Details how various charges are to be shared among members (e.g., property tax as per local authority, water charges per inlet, service charges equally per flat).</p>
+        <p><b>70. Payment of Charges:</b> The Secretary issues bills, and members must pay within the stipulated period.</p>
+        <p><b>71. Defaults:</b> Non-payment within the period constitutes a default, and the case is brought before the committee.</p>
+        <p><b>72. Interest on Defaulted Charges:</b> A member shall pay simple interest up to 21% per annum on defaulted charges from the due date until payment.</p>
+    </div>
+</div>
+
+<h3 id="section-9">IX. INCORPORATION, DUTIES AND POWERS OF THE SOCIETY</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-73-75" data-bylaw-title="73-75. Corporate Body and Powers">
+    <h4 class="bylaw-title">73-75. Corporate Body and Powers</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>73. Incorporation:</b> The registration of the Society renders it a body corporate with perpetual succession and a common seal.</p>
+        <p><b>74. Common Seal:</b> The seal shall be in the custody of the Secretary and used under the authority of the Committee.</p>
+        <p><b>75. Charge and Set-off:</b> The Society shall have a charge on a member's shares and interest for any dues owed to the society.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-76-85" data-bylaw-title="76-85. Allotment and Use of Flats & Parking">
+    <h4 class="bylaw-title">76-85. Allotment and Use of Flats & Parking</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>76. Allotment of Flats:</b> A purchased flat is deemed allotted. Change of user is not permissible without committee sanction. For plot-purchased type societies, allotment is based on first-come-first-served, full payment, or by lot.</p>
+        <p><b>77. Structural Audit:</b> The Society must conduct a structural audit every 5 years for buildings aged 15-30 years, and every 3 years for buildings over 30 years old.</p>
+        <p><b>78-85. Parking Spaces:</b> Allotment of parking spaces/stilts shall be made by the committee on a 'First Come First Served' basis. A member with a vehicle is eligible. Charges are decided by the general body.</p>
+    </div>
+</div>
+
+<h3 id="section-10">X. GENERAL MEETINGS</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-86-94" data-bylaw-title="86-94. First General Meeting">
+    <h4 class="bylaw-title">86-94. First General Meeting</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>86. Holding of First GM:</b> To be held within 3 months of registration, convened by the Chief Promoter.</p>
+        <p><b>89. Functions of First GM:</b> Includes electing a president for the meeting, admitting new members, approving accounts, and constituting a Provisional Committee.</p>
+        <p><b>91-94. Handing Over Records:</b> The Chief Promoter must hand over all records to the new Provisional Committee, which holds office for one year or until regular elections.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-95-96" data-bylaw-title="95-96. Annual General Meetings (AGM)">
+    <h4 class="bylaw-title">95-96. Annual General Meetings (AGM)</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>95. When to Hold AGM:</b> Must be held on or before 14th August each year.</p>
+        <p><b>96. Functions of AGM:</b> Includes reading past minutes, receiving the annual report and accounts, considering audit reports, declaring election results, and appointing an auditor.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-97-110" data-bylaw-title="97-110. Special General Meetings (SGM)">
+    <h4 class="bylaw-title">97-110. Special General Meetings (SGM)</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>97. Calling an SGM:</b> Can be called by the Chairman, a majority of the committee, or upon requisition by 1/5th of the members.</p>
+        <p><b>100. Notice Period:</b> 14 clear days' notice for an AGM and 5 clear days' for an SGM.</p>
+        <p><b>101. Quorum:</b> 2/3rd of the total number of members or 20, whichever is less.</p>
+        <p><b>102. Adjourned Meeting:</b> If quorum is not met, the meeting is adjourned. The adjourned meeting can proceed without a quorum.</p>
+        <p><b>106-108. Voting:</b> One member, one vote. Decisions are by simple majority. The chairman has a casting vote in case of a tie.</p>
+    </div>
+</div>
+
+
+<h3 id="section-11">XI. MANAGEMENT OF THE AFFAIRS OF THE SOCIETY</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-111-141" data-bylaw-title="111-141. The Managing Committee">
+    <h4 class="bylaw-title">111-141. The Managing Committee</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>111-113. Authority:</b> Final authority rests with the General Body, but day-to-day management vests in the Committee.</p>
+        <p><b>115. Strength of Committee:</b> Can be 5, 7, 9, or 11 members, including reserved seats for women.</p>
+        <p><b>116. Election:</b> Elections are held every 5 years.</p>
+        <p><b>118. Disqualification:</b> Details conditions under which a person is disqualified from being on the committee (e.g., conviction, defaulting on dues, sub-letting without permission).</p>
+        <p><b>120. Cessation of Membership:</b> A committee member ceases to hold office if they incur a disqualification or fail to attend three consecutive monthly meetings without leave.</p>
+        <p><b>122. Term of Office:</b> 5 years.</p>
+        <p><b>126. Office Bearers:</b> The committee elects a Chairman, Secretary, and Treasurer at its first meeting. A 'No Confidence' motion can be passed against them.</p>
+        <p><b>127. Quorum for Meeting:</b> Varies based on committee strength (e.g., 3 for a 5-member committee).</p>
+        <p><b>139. Powers of Committee:</b> Extensive list of powers, including raising funds, considering resignations, taking action on inspection reports, fixing charges, and ensuring compliance.</p>
+        <p><b>140-141. Powers of Chairman and Secretary:</b> The Chairman has overall superintendence. The Secretary's functions include issuing share certificates, dealing with applications, preparing demand notices, and recording minutes.</p>
+    </div>
+</div>
+
+<h3 id="section-12">XII. MAINTENANCE OF BOOKS OF ACCOUNT AND REGISTERS</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-142-148" data-bylaw-title="142-148. Accounts and Records">
+    <h4 class="bylaw-title">142-148. Accounts and Records</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>142. Books to be Maintained:</b> Lists all mandatory registers, including Register of Members (I-Form), Cash Book, General Ledger, Property Register, Share Register, Nomination Register, and Minutes Books.</p>
+        <p><b>143. Files to be Maintained:</b> Lists all mandatory files, including applications for membership, correspondence with authorities, agreements, vouchers, and audit reports.</p>
+        <p><b>147. Finalisation of Accounts:</b> Accounts must be finalised within 45 days of the close of the co-operative year (March 31st).</p>
+    </div>
+</div>
+
+<h3 id="section-13">XIII. APPROPRIATION OF PROFITS</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-149" data-bylaw-title="149. Appropriation of Profits">
+    <h4 class="bylaw-title">149. Appropriation of Profits</h4>
+    <div class="bylaw-content">
+        <p>At least 25% of net profits must be placed in the Reserve Fund. The remaining 75% can be used for dividends (not exceeding 15%), honorarium to office-bearers, and a common welfare fund.</p>
+    </div>
+</div>
+
+<h3 id="section-14">XIV. WRITING OFF OF OUTSTANDINGS</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-150-151" data-bylaw-title="150-151. Writing Off Dues">
+    <h4 class="bylaw-title">150-151. Writing Off Dues</h4>
+    <div class="bylaw-content">
+        <p>The society can write off irrecoverable charges, but only with the sanction of the general body meeting, approval of any financing agency, and approval of the Registering Authority.</p>
+    </div>
+</div>
+
+<h3 id="section-15">XV. AUDIT OF ACCOUNTS</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-152-154" data-bylaw-title="152-154. Audit">
+    <h4 class="bylaw-title">152-154. Audit</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>152. Internal Auditor:</b> The society may appoint an internal auditor.</p>
+        <p><b>153. Production of Books:</b> The Secretary must produce all records for the auditors.</p>
+        <p><b>154. Audit Rectification Report:</b> The Secretary must prepare a rectification report (Form 'O') based on audit objections and place it before the committee.</p>
+    </div>
+</div>
+
+<h3 id="section-16">XVI. CONVEYANCE AND MAINTENANCE OF PROPERTY</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-155-162" data-bylaw-title="155-162. Conveyance and Maintenance">
+    <h4 class="bylaw-title">155-162. Conveyance and Maintenance</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>155. Conveyance Deed:</b> The committee must take steps to get the property conveyed in the society's name.</p>
+        <p><b>156. Responsibility for Maintenance:</b> It is the committee's responsibility to maintain the society's property in good condition.</p>
+        <p><b>158. Expenditure Limits:</b> Sets limits on repair expenditure that the committee can incur without general body approval.</p>
+        <p><b>160. Society's Cost Repairs:</b> Lists repairs to be carried out at the society's cost, including structural repairs, external water lines, lifts, and common area lighting.</p>
+        <p><b>161. Insurance:</b> The society must insure its buildings against fire and earthquake.</p>
+    </div>
+</div>
+
+<h3 id="section-17">XVII. OTHER MISCELLANEOUS MATTERS</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-163-172" data-bylaw-title="163-172. Miscellaneous">
+    <h4 class="bylaw-title">163-172. Miscellaneous</h4>
+    <div class="bylaw-content space-y-2">
+        <p><b>163. Service of Notices:</b> Notices can be sent by hand delivery or post and must be displayed on the notice board.</p>
+        <p><b>166. Penalties for Breaches:</b> The general body can prescribe penalties for breaches of bye-laws.</p>
+        <p><b>167. Amendments to Bye-laws:</b> Requires a 2/3rd majority at a general body meeting and approval from the Registering Authority.</p>
+        <p><b>171. Use of Terrace:</b> The committee may allow temporary use of the terrace by a member for a function, subject to charges and restrictions.</p>
+        <p><b>172. Copying Fees:</b> Sets the fees for providing copies of various documents to members.</p>
+    </div>
+</div>
+
+<h3 id="section-18">XVIII. REDRESSAL OF COMPLAINTS</h3>
+<div class="bylaw-item" data-bylaw-id="bylaw-173" data-bylaw-title="173. Submitting a Complaint">
+    <h4 class="bylaw-title">173. Submitting a Complaint</h4>
+    <div class="bylaw-content">
+        <p>A member shall submit their complaint application in writing to any Office Bearer of the society, giving details of the complaint.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-174" data-bylaw-title="174. Committee's Action">
+    <h4 class="bylaw-title">174. Committee's Action</h4>
+    <div class="bylaw-content">
+        <p>After receiving a complaint, the committee shall make a decision in the next Managing Committee meeting. This decision must be communicated to the concerned member within 15 days.</p>
+    </div>
+</div>
+<div class="bylaw-item" data-bylaw-id="bylaw-175" data-bylaw-title="175. Escalation to Authorities">
+    <h4 class="bylaw-title">175. Escalation to Authorities</h4>
+    <div class="bylaw-content space-y-3">
+        <p>If the member is not satisfied with the committee's decision or receives no response, they may approach the appropriate Competent Authority based on the nature of the complaint:</p>
+        <p><b>A) Registrar:</b> For issues like refusal of membership, non-issuance of share certificates, illegal charges, record tampering, fund misappropriation, election issues, etc.</p>
+        <p><b>B) Co-operative Court:</b> For disputes under Section 91 of the Act, like resolutions, committee elections, repairs, parking, flat allotment, etc.</p>
+        <p><b>C) Civil Court:</b> For disputes related to builder agreements, substandard construction, conveyance, etc.</p>
+        <p><b>D) Corporation/Local Authority:</b> For issues like unauthorized construction, inadequate water supply, change of flat use, structural problems, etc.</p>
+        <p><b>E) Police:</b> For matters like nuisance, threats, or assault.</p>
+        <p><b>F) General Body:</b> For complaints about property maintenance, unfair fines, use of open spaces, etc.</p>
+        <p><b>G) Federation:</b> For issues like a member blocking the secretary's entry, non-acceptance of communication, or calling special meetings.</p>
+    </div>
+</div>
+`;
+        
+        const sections = [
+            { id: 'section-1', title: 'Preliminary', icon: 'Book' },
+            { id: 'section-2', title: 'Interpretations', icon: 'BookOpen' },
+            { id: 'section-3', title: 'Area of Operation', icon: 'Map' },
+            { id: 'section-4', title: 'Objects', icon: 'Target' },
+            { id: 'section-5', title: 'Affiliation', icon: 'Link' },
+            { id: 'section-6', title: 'Funds & Investment', icon: 'Landmark' },
+            { id: 'section-7', title: 'Members Rights & Responsibilities', icon: 'Users' },
+            { id: 'section-8', title: 'Levy of Charges', icon: 'Receipt' },
+            { id: 'section-9', title: 'Incorporation & Powers', icon: 'Building' },
+            { id: 'section-10', title: 'General Meetings', icon: 'Mic' },
+            { id: 'section-11', title: 'Management of Affairs', icon: 'ClipboardList' },
+            { id: 'section-12', title: 'Accounts & Registers', icon: 'BookCopy' },
+            { id: 'section-13', title: 'Appropriation of Profits', icon: 'PieChart' },
+            { id: 'section-14', title: 'Writing Off Outstandings', icon: 'FileX' },
+            { id: 'section-15', title: 'Audit of Accounts', icon: 'FileCheck' },
+            { id: 'section-16', 'title': 'Conveyance & Maintenance', icon: 'Wrench' },
+            { id: 'section-17', 'title': 'Miscellaneous Matters', icon: 'Box' },
+            { id: 'section-18', 'title': 'Redressal of Complaints', icon: 'MessageSquareWarning' },
+        ];
+
+        // --- DOM ELEMENTS ---
+        const bylawsContentEl = document.getElementById('bylaws-content');
+        const sidebarNavEl = document.getElementById('sidebar-nav');
+        const mobileSidebarNavEl = document.getElementById('mobile-sidebar-nav');
+        const searchInputEl = document.getElementById('search-input');
+        const searchButtonEl = document.getElementById('search-button');
+        const searchResultsInfoEl = document.getElementById('search-results-info');
+        const contentAreaEl = document.getElementById('content-area');
+        
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileSidebar = document.getElementById('mobile-sidebar');
+        
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const printBtn = document.getElementById('print-btn');
+        const bookmarkShowBtn = document.getElementById('bookmark-show-btn');
+        const bookmarksModal = document.getElementById('bookmarks-modal');
+        const bookmarksCloseBtn = document.getElementById('bookmarks-close-btn');
+        const bookmarksList = document.getElementById('bookmarks-list');
+
+
+        // --- STATE ---
+        let searchMatches = [];
+        let currentMatchIndex = -1;
+        let bookmarks = [];
+
+        // --- FUNCTIONS ---
+        
+        /**
+         * Dynamically adds bookmark buttons to each bylaw item.
+         */
+        function addBookmarkButtons() {
+            const items = document.querySelectorAll('.bylaw-item');
+            items.forEach(item => {
+                const bylawId = item.dataset.bylawId;
+                if (!bylawId) return;
+
+                const btn = document.createElement('button');
+                btn.className = 'bookmark-btn absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors';
+                btn.setAttribute('aria-label', 'Bookmark this bylaw');
+                btn.innerHTML = '<i data-lucide="bookmark" class="w-5 h-5 text-slate-400"></i>';
+                item.style.position = 'relative';
+                item.appendChild(btn);
+            });
+            updateBookmarkIcons();
+        }
+        
+        /**
+         * Loads the bylaws text into the content area and adds interactive elements.
+         */
+        function loadContent() {
+            bylawsContentEl.innerHTML = bylawsText;
+            addBookmarkButtons();
+        }
+
+        /**
+         * Populates the sidebar navigation menus.
+         */
+        function populateNav() {
+            let navHtml = '<ul class="space-y-1">';
+            sections.forEach(section => {
+                 navHtml += `<li><a href="#${section.id}" class="nav-link text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-3 px-3 py-2.5 rounded-md text-sm"><i data-lucide="${section.icon.toLowerCase()}" class="w-5 h-5 text-slate-400 dark:text-slate-500"></i><span>${section.title}</span></a></li>`;
+            });
+            navHtml += '</ul>';
+            sidebarNavEl.innerHTML = navHtml;
+            mobileSidebarNavEl.innerHTML = navHtml;
+        }
+        
+        // --- Search Functions ---
+        function clearSearch() {
+            const highlights = bylawsContentEl.querySelectorAll('mark.highlight');
+            highlights.forEach(mark => { mark.outerHTML = mark.innerHTML; });
+            searchResultsInfoEl.classList.add('hidden');
+            searchResultsInfoEl.innerHTML = '';
+            searchMatches = [];
+            currentMatchIndex = -1;
+        }
+        
+        function performSearch() {
+            clearSearch();
+            const searchTerm = searchInputEl.value.trim();
+            if (searchTerm.length < 2) return;
+            const regex = new RegExp(`(${searchTerm.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+            const walker = document.createTreeWalker(bylawsContentEl, NodeFilter.SHOW_TEXT, null, false);
+            let node;
+            const nodesToReplace = [];
+            while (node = walker.nextNode()) {
+                if (node.parentElement.tagName.match(/^(SCRIPT|STYLE)$/)) continue;
+                if (regex.test(node.nodeValue)) {
+                    const span = document.createElement('span');
+                    span.innerHTML = node.nodeValue.replace(regex, `<mark class="highlight">$1</mark>`);
+                    nodesToReplace.push({ oldNode: node, newNode: span });
+                }
+            }
+            nodesToReplace.forEach(item => item.oldNode.parentNode.replaceChild(item.newNode, item.oldNode));
+            searchMatches = Array.from(bylawsContentEl.querySelectorAll('mark.highlight'));
+            if (searchMatches.length > 0) {
+                currentMatchIndex = 0;
+                updateSearchResultsInfo();
+                navigateToMatch(0);
+            } else {
+                 searchResultsInfoEl.innerHTML = `<span>No matches found.</span>`;
+            }
+             searchResultsInfoEl.classList.add('flex');
+             searchResultsInfoEl.classList.remove('hidden');
+        }
+
+        function updateSearchResultsInfo() {
+            if (searchMatches.length > 0) {
+                 searchResultsInfoEl.innerHTML = `
+                    <span class="font-medium">${currentMatchIndex + 1} of ${searchMatches.length} matches</span>
+                    <div class="flex items-center gap-2">
+                        <button id="prev-match" class="p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"><i data-lucide="chevron-up" class="w-5 h-5"></i></button>
+                        <button id="next-match" class="p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"><i data-lucide="chevron-down" class="w-5 h-5"></i></button>
+                        <button id="clear-search-btn" class="p-1.5 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    </div>`;
+                 document.getElementById('prev-match').addEventListener('click', () => navigateToMatch(currentMatchIndex - 1));
+                 document.getElementById('next-match').addEventListener('click', () => navigateToMatch(currentMatchIndex + 1));
+                 document.getElementById('clear-search-btn').addEventListener('click', clearSearch);
+                 lucide.createIcons();
+            } else {
+                 searchResultsInfoEl.innerHTML = `<span>No matches found.</span>`;
+            }
+             searchResultsInfoEl.classList.remove('hidden');
+             searchResultsInfoEl.classList.add('flex');
+        }
+        
+        function navigateToMatch(index) {
+            if (index < 0 || index >= searchMatches.length) return;
+            if (currentMatchIndex > -1) searchMatches[currentMatchIndex].classList.remove('active');
+            currentMatchIndex = index;
+            const currentMatch = searchMatches[currentMatchIndex];
+            currentMatch.classList.add('active');
+            currentMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            updateSearchResultsInfo();
+            document.getElementById('prev-match').disabled = currentMatchIndex === 0;
+            document.getElementById('next-match').disabled = currentMatchIndex === searchMatches.length - 1;
+        }
+
+        // --- Feature Functions: Dark Mode, Bookmarks, Print ---
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.documentElement.classList.toggle('light', !isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+        
+        function loadBookmarks() {
+            const stored = localStorage.getItem('bylawBookmarks');
+            bookmarks = stored ? JSON.parse(stored) : [];
+            updateBookmarkIcons();
+        }
+
+        function saveBookmarks() {
+            localStorage.setItem('bylawBookmarks', JSON.stringify(bookmarks));
+        }
+
+        function toggleBookmark(bylawId) {
+            const index = bookmarks.indexOf(bylawId);
+            if (index > -1) {
+                bookmarks.splice(index, 1);
+            } else {
+                bookmarks.push(bylawId);
+            }
+            saveBookmarks();
+            updateBookmarkIcons();
+        }
+
+        function updateBookmarkIcons() {
+            document.querySelectorAll('.bookmark-btn').forEach(btn => {
+                const bylawId = btn.closest('.bylaw-item').dataset.bylawId;
+                if (bookmarks.includes(bylawId)) {
+                    btn.classList.add('bookmarked');
+                } else {
+                    btn.classList.remove('bookmarked');
+                }
+            });
+        }
+        
+        function renderBookmarks() {
+            if (bookmarks.length === 0) {
+                bookmarksList.innerHTML = '<p class="text-center text-slate-500 dark:text-slate-400">You have no bookmarked bylaws.</p>';
+                return;
+            }
+            bookmarksList.innerHTML = bookmarks.map(bylawId => {
+                const item = document.querySelector(`.bylaw-item[data-bylaw-id="${bylawId}"]`);
+                const title = item ? item.dataset.bylawTitle : 'Unknown Bylaw';
+                return `<a href="#${bylawId}" class="bookmark-link block p-3 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300">${title}</a>`;
+            }).join('');
+            
+            document.querySelectorAll('.bookmark-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const bylawId = e.target.closest('a').getAttribute('href').substring(1);
+                    document.querySelector(`[data-bylaw-id="${bylawId}"]`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    hideBookmarksModal();
+                });
+            });
+        }
+        
+        function showBookmarksModal() {
+            renderBookmarks();
+            bookmarksModal.classList.remove('hidden');
+            bookmarksModal.classList.add('flex');
+        }
+
+        function hideBookmarksModal() {
+            bookmarksModal.classList.add('hidden');
+            bookmarksModal.classList.remove('flex');
+        }
+
+
+        // --- Navigation & UI Functions ---
+        function handleNavClick(e) {
+            const link = e.target.closest('.nav-link');
+            if (link) {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                if(mobileMenu.classList.contains('hidden') === false) hideMobileMenu();
+            }
+        }
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const id = entry.target.getAttribute('id');
+                const navLink = document.querySelector(`.nav-link[href="#${id}"]`);
+                if(navLink && entry.isIntersecting) {
+                    document.querySelectorAll('.nav-link.active').forEach(link => link.classList.remove('active'));
+                    navLink.classList.add('active');
+                }
+            });
+        }, { rootMargin: "-30% 0px -70% 0px" });
+
+        function observeSections() {
+            document.querySelectorAll('.prose h3').forEach(section => observer.observe(section));
+        }
+        
+        function showMobileMenu() {
+            mobileMenu.classList.remove('hidden');
+            setTimeout(() => { mobileSidebar.classList.remove('-translate-x-full'); }, 10);
+        }
+
+        function hideMobileMenu() {
+            mobileSidebar.classList.add('-translate-x-full');
+            setTimeout(() => { mobileMenu.classList.add('hidden'); }, 300);
+        }
+        
+        // --- EVENT LISTENERS ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check for saved theme
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+            } else {
+                document.documentElement.classList.add('light');
+                document.documentElement.classList.remove('dark');
+            }
+            
+            loadContent();
+            populateNav();
+            loadBookmarks();
+            lucide.createIcons();
+            observeSections();
+        });
+
+        // Search
+        searchButtonEl.addEventListener('click', performSearch);
+        searchInputEl.addEventListener('keyup', e => {
+            if (e.key === 'Enter') performSearch();
+            if (e.key === 'Escape') { clearSearch(); searchInputEl.value = ''; }
+        });
+        
+        // Header Buttons
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+        printBtn.addEventListener('click', () => window.print());
+        bookmarkShowBtn.addEventListener('click', showBookmarksModal);
+        bookmarksCloseBtn.addEventListener('click', hideBookmarksModal);
+        bookmarksModal.addEventListener('click', (e) => {
+            if (e.target === bookmarksModal) hideBookmarksModal();
+        });
+        
+        // Content area delegation for bookmarks
+        contentAreaEl.addEventListener('click', e => {
+            const btn = e.target.closest('.bookmark-btn');
+            if (btn) {
+                const bylawId = btn.closest('.bylaw-item').dataset.bylawId;
+                if (bylawId) toggleBookmark(bylawId);
+            }
+        });
+
+        // Navigation
+        sidebarNavEl.addEventListener('click', handleNavClick);
+        mobileSidebarNavEl.addEventListener('click', handleNavClick);
+        mobileMenuButton.addEventListener('click', showMobileMenu);
+        closeMobileMenuButton.addEventListener('click', hideMobileMenu);
+        mobileMenu.addEventListener('click', (e) => {
+             if (e.target === mobileMenu) hideMobileMenu();
+        });
+
+    </script>
+</body>
+</html>
+
